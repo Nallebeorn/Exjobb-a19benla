@@ -42,7 +42,7 @@ Shader "Line Art/Lines Post Processing"
             VertexOut vert(VertexIn v)
             {
                 VertexOut o;
-                o.pos = TransformObjectToHClip(v.pos);
+                o.pos = TransformObjectToHClip(v.pos.xyz);
                 o.uv = v.uv;
                 return o;
             }
