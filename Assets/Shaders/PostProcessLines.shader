@@ -49,7 +49,6 @@ Shader "Line Art/Lines Post Processing"
 
             float3 VisualizeNormals(float3 n)
             {
-                n.z = -n.z;
                 return n * 0.5 + float3(0.5, 0.5, 0.5);
             }
 
@@ -73,16 +72,16 @@ Shader "Line Art/Lines Post Processing"
             float4 frag(VertexOut v) : SV_Target
             {
                 #define FILTER_SIZE 6
-                
+
                 float3 sobelFilterX[FILTER_SIZE] =
                 {
-                    float3(-1., -1., -1.),
-                    float3(-1., 0., -2.),
-                    float3(-1., 1., -1.),
+                    float3(-1, -1, -1),
+                    float3(-1, 0, -2),
+                    float3(-1, 1, -1),
 
-                    float3(1., -1., 1.),
-                    float3(1., 0., 2.),
-                    float3(1., 1., 1.)
+                    float3(1, -1, 1),
+                    float3(1, 0, 2),
+                    float3(1, 1, 1)
                 };
 
                 float3 sobelFilterY[FILTER_SIZE] =
@@ -101,8 +100,8 @@ Shader "Line Art/Lines Post Processing"
                 float2 pixelSize = _MainTex_TexelSize.xy;
 
                 float3 planePos = SampleWorldSpacePosition(v.uv);
-                float3 planeNormal = SampleSceneNormals(v.uv);
-                
+                float3 planeNormal = normalize(mul(unity_CameraToWorld, float4(SampleSceneNormals(v.uv), 0.0)).xyz);
+
                 float depthEdgeX = 0;
                 float depthEdgeY = 0;
                 for (int i = 0; i < FILTER_SIZE; i++)
@@ -115,15 +114,16 @@ Shader "Line Art/Lines Post Processing"
                     float3 posX = SampleWorldSpacePosition(coordsX);
                     float3 posY = SampleWorldSpacePosition(coordsY);
 
-                    depthEdgeX += DistanceToPlane(posX, planePos, planeNormal) > _DepthThreshold;
-                    depthEdgeY += DistanceToPlane(posY, planePos, planeNormal) > _DepthThreshold;
+                    depthEdgeX += DistanceToPlane(posX, planePos, planeNormal) * weightX;
+                    depthEdgeY += DistanceToPlane(posY, planePos, planeNormal) * weightY;
                 }
 
-                float depthEdge = max(depthEdgeX, depthEdgeY);
-
-                float3 normal = SampleSceneNormals(v.uv);
+                float depthEdge = sqrt(depthEdgeX * depthEdgeX + depthEdgeY * depthEdgeY) > _DepthThreshold;
 
                 col = 1.0 - depthEdge;
+
+                // col = VisualizeNormals(planeNormal);
+                // col = SampleSceneDepth(v.uv);
 
                 return float4(col.rgb, 1.0);
             }
