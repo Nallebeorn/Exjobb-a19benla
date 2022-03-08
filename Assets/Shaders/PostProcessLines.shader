@@ -6,6 +6,7 @@ Shader "Line Art/Lines Post Processing"
         //[HideInInspector] _IndexTex ("Surface Index Texture", 2D) = "black" {}
         _Scale ("Scale", Float) = 0.0010
         _DepthThreshold ("Depth Threshold", float) = 0.001
+        _NormalThresholdAngle ("Normal Threshold Angle", float) = 30
         _OutlineColor ("Outline Color", Color) = (0, 0, 0, 0)
     }
     SubShader
@@ -57,11 +58,17 @@ Shader "Line Art/Lines Post Processing"
             float4 _OutlineColor;
             float _Scale;
             float _DepthThreshold;
+            float _NormalThresholdAngle;
 
             float3 SampleWorldSpacePosition(float2 uv)
             {
                 float depth = SampleSceneDepth(uv);
                 return ComputeWorldSpacePosition(uv, depth, UNITY_MATRIX_I_VP);
+            }
+
+            float3 SampleWorldSpaceNormal(float2 uv)
+            {
+                return normalize(mul(unity_CameraToWorld, float4(SampleSceneNormals(uv), 0.0)).xyz);
             }
 
             float DistanceToPlane(float3 from, float3 planeOrigin, float3 planeNormal)
@@ -100,10 +107,14 @@ Shader "Line Art/Lines Post Processing"
                 float2 pixelSize = _MainTex_TexelSize.xy;
 
                 float3 planePos = SampleWorldSpacePosition(v.uv);
-                float3 planeNormal = normalize(mul(unity_CameraToWorld, float4(SampleSceneNormals(v.uv), 0.0)).xyz);
+                float3 planeNormal = SampleWorldSpaceNormal(v.uv);
 
                 float depthEdgeX = 0;
                 float depthEdgeY = 0;
+
+                float normalEdgeX = 0;
+                float normalEdgeY = 0;
+                
                 for (int i = 0; i < FILTER_SIZE; i++)
                 {
                     const float2 coordsX = v.uv + sobelFilterX[i].xy * pixelSize;
@@ -114,13 +125,22 @@ Shader "Line Art/Lines Post Processing"
                     float3 posX = SampleWorldSpacePosition(coordsX);
                     float3 posY = SampleWorldSpacePosition(coordsY);
 
+                    // depthEdgeX += SampleSceneDepth(coordsX) * weightX;
+                    // depthEdgeY += SampleSceneDepth(coordsY) * weightY;
                     depthEdgeX += DistanceToPlane(posX, planePos, planeNormal) * weightX;
                     depthEdgeY += DistanceToPlane(posY, planePos, planeNormal) * weightY;
+
+                    normalEdgeX += dot(planeNormal, SampleWorldSpaceNormal(coordsX)) * weightX;
+                    normalEdgeY += dot(planeNormal, SampleWorldSpaceNormal(coordsY)) * weightY;
                 }
 
                 float depthEdge = sqrt(depthEdgeX * depthEdgeX + depthEdgeY * depthEdgeY) > _DepthThreshold;
+                float normalThreshold = cos(DegToRad(_NormalThresholdAngle));
+                float normalEdge = sqrt(normalEdgeX * normalEdgeX + normalEdgeY * normalEdgeY) > normalThreshold;
 
-                col = 1.0 - depthEdge;
+                float edge = max(depthEdge, normalEdge);
+
+                col = 1.0 - edge;
 
                 // col = VisualizeNormals(planeNormal);
                 // col = SampleSceneDepth(v.uv);
