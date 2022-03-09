@@ -78,6 +78,8 @@ Shader "Line Art/Lines Post Processing"
 
             float4 frag(VertexOut v) : SV_Target
             {
+                float4 baseCol = tex2D(_MainTex, v.uv);
+                
                 #define FILTER_SIZE 6
 
                 float3 sobelFilterX[FILTER_SIZE] =
@@ -140,7 +142,7 @@ Shader "Line Art/Lines Post Processing"
 
                 float edge = max(depthEdge, normalEdge);
 
-                col = 1.0 - edge;
+                col = lerp(baseCol, _OutlineColor, edge).rgb;
 
                 // col = VisualizeNormals(planeNormal);
                 // col = SampleSceneDepth(v.uv);
