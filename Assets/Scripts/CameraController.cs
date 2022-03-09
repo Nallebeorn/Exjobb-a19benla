@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,6 +8,8 @@ public class CameraController : MonoBehaviour
     public float speed = 10.0f;
     public float fastSpeed = 30.0f;
     public float rotateSpeed = 1.0f;
+
+    private bool pressedEscape = false;
     
     // Start is called before the first frame update
     void Start()
@@ -18,6 +21,18 @@ public class CameraController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            pressedEscape = true;
+        }
+
+        if (Input.GetMouseButtonDown(0))
+        {
+            pressedEscape = false;
+        }
+        
+        if (!Application.isFocused || pressedEscape) return;
+        
         float strafe = Input.GetAxis("Horizontal");
         float forward = Input.GetAxis("Vertical");
         float elevate = Input.GetAxis("Elevate");
@@ -33,5 +48,13 @@ public class CameraController : MonoBehaviour
         
         transform.Rotate(Vector3.up, rotateSpeed * yaw, Space.World);
         transform.Rotate(Vector3.right, -rotateSpeed * pitch, Space.Self);
+    }
+
+    private void OnApplicationFocus(bool hasFocus)
+    {
+        if (hasFocus)
+        {
+            pressedEscape = false;
+        }
     }
 }
