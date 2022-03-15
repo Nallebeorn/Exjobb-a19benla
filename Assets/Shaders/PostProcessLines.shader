@@ -79,30 +79,38 @@ Shader "Line Art/Lines Post Processing"
             float4 frag(VertexOut v) : SV_Target
             {
                 float4 baseCol = tex2D(_MainTex, v.uv);
-                
-                #define FILTER_SIZE 6
 
-                float3 sobelFilterX[FILTER_SIZE] =
+                #define FILTER_SIZE 4
+
+                float3 filter[FILTER_SIZE] =
                 {
-                    float3(-1, -1, -1),
-                    float3(-1, 0, -2),
-                    float3(-1, 1, -1),
-
+                    float3(-1, -1, 1),
                     float3(1, -1, 1),
-                    float3(1, 0, 2),
-                    float3(1, 1, 1)
-                };
-
-                float3 sobelFilterY[FILTER_SIZE] =
-                {
-                    float3(-1, -1, -1),
-                    float3(0, -1, -2),
-                    float3(1, -1, -1),
-
                     float3(-1, 1, 1),
-                    float3(0, 1, 2),
-                    float3(1, 1, 1)
+                    float3(1, 1, 1),
                 };
+
+                // float3 sobelFilterX[FILTER_SIZE] =
+                // {
+                //     float3(-1, -1, -1),
+                //     float3(-1, 0, -2),
+                //     float3(-1, 1, -1),
+                //
+                //     float3(1, -1, 1),
+                //     float3(1, 0, 2),
+                //     float3(1, 1, 1)
+                // };
+                //
+                // float3 sobelFilterY[FILTER_SIZE] =
+                // {
+                //     float3(-1, -1, -1),
+                //     float3(0, -1, -2),
+                //     float3(1, -1, -1),
+                //
+                //     float3(-1, 1, 1),
+                //     float3(0, 1, 2),
+                //     float3(1, 1, 1)
+                // };
 
                 float3 col = float3(0, 0, 0);
 
@@ -111,37 +119,28 @@ Shader "Line Art/Lines Post Processing"
                 float3 planePos = SampleWorldSpacePosition(v.uv);
                 float3 planeNormal = SampleWorldSpaceNormal(v.uv);
 
-                float depthEdgeX = 0;
-                float depthEdgeY = 0;
+                float depthEdge = 0;
+                float normalEdge = 0;
 
-                float normalEdgeX = 0;
-                float normalEdgeY = 0;
+                float normalThreshold = cos(DegToRad(_NormalThresholdAngle));
                 
                 for (int i = 0; i < FILTER_SIZE; i++)
                 {
-                    const float2 coordsX = v.uv + sobelFilterX[i].xy * pixelSize;
-                    const float2 coordsY = v.uv + sobelFilterY[i].xy * pixelSize;
-                    const float weightX = sobelFilterX[i].z;
-                    const float weightY = sobelFilterY[i].z;
+                    const float2 coords = v.uv + filter[i].xy * pixelSize;
 
-                    float3 posX = SampleWorldSpacePosition(coordsX);
-                    float3 posY = SampleWorldSpacePosition(coordsY);
+                    float3 pos = SampleWorldSpacePosition(coords);
 
                     // depthEdgeX += SampleSceneDepth(coordsX) * weightX;
                     // depthEdgeY += SampleSceneDepth(coordsY) * weightY;
-                    depthEdgeX += DistanceToPlane(posX, planePos, planeNormal) * weightX;
-                    depthEdgeY += DistanceToPlane(posY, planePos, planeNormal) * weightY;
+                    depthEdge += step(_DepthThreshold, DistanceToPlane(pos, planePos, planeNormal));
 
-                    normalEdgeX += dot(planeNormal, SampleWorldSpaceNormal(coordsX)) * weightX;
-                    normalEdgeY += dot(planeNormal, SampleWorldSpaceNormal(coordsY)) * weightY;
+                    normalEdge += 1.0 - step(normalThreshold, dot(planeNormal, SampleWorldSpaceNormal(coords)));
                 }
 
-                float depthEdge = sqrt(depthEdgeX * depthEdgeX + depthEdgeY * depthEdgeY) > _DepthThreshold;
-                float normalThreshold = cos(DegToRad(_NormalThresholdAngle));
-                float normalEdge = sqrt(normalEdgeX * normalEdgeX + normalEdgeY * normalEdgeY) > normalThreshold;
+                float edge = max(saturate(depthEdge), saturate(normalEdge));
 
-                float edge = max(depthEdge, normalEdge);
-
+                // edge = saturate(depthEdge);
+                
                 col = lerp(baseCol, _OutlineColor, edge).rgb;
 
                 // col = VisualizeNormals(planeNormal);
@@ -149,6 +148,7 @@ Shader "Line Art/Lines Post Processing"
 
                 return float4(col.rgb, 1.0);
             }
+            
             ENDHLSL
         }
     }
