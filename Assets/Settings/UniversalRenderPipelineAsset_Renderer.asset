@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_RendererFeatures:
   - {fileID: 8446802137732923561}
-  m_RendererFeatureMap: a9c0948bca113975
+  - {fileID: 549114648824853470}
+  m_RendererFeatureMap: a9c0948bca113975de332b20ddd89e07
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
   shaders:
@@ -43,6 +44,27 @@ MonoBehaviour:
   m_ShadowTransparentReceive: 1
   m_RenderingMode: 0
   m_AccurateGbufferNormals: 0
+--- !u!114 &549114648824853470
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ee94f0cccf3576498713ed828d054d2, type: 3}
+  m_Name: CompositeLines
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  settings:
+    renderPassEvent: 500
+    blitMaterial: {fileID: 2100000, guid: 1c8b2165b681e2a43a554b4323d82166, type: 2}
+    blitMaterialPassIndex: 0
+    sourceType: 0
+    destinationType: 0
+    sourceTextureId: _SourceTexture
+    destinationTextureId: _DestinationTexture
 --- !u!114 &8446802137732923561
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -53,7 +75,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2ee94f0cccf3576498713ed828d054d2, type: 3}
-  m_Name: LinesPostProcess
+  m_Name: EdgeDetection
   m_EditorClassIdentifier: 
   m_Active: 1
   settings:
@@ -61,6 +83,6 @@ MonoBehaviour:
     blitMaterial: {fileID: 2100000, guid: 166c0e8e3ba08ac4f9fc44c81e1a380f, type: 2}
     blitMaterialPassIndex: 0
     sourceType: 0
-    destinationType: 0
+    destinationType: 1
     sourceTextureId: _SourceTexture
-    destinationTextureId: _DestinationTexture
+    destinationTextureId: _LinesTex

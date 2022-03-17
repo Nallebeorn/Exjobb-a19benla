@@ -4,10 +4,8 @@ Shader "Line Art/Lines Post Processing"
     {
         [HideInInspector] _MainTex ("Texture", 2D) = "white" {}
         //[HideInInspector] _IndexTex ("Surface Index Texture", 2D) = "black" {}
-        _Scale ("Scale", Float) = 0.0010
         _DepthThreshold ("Depth Threshold", float) = 0.001
         _NormalThresholdAngle ("Normal Threshold Angle", float) = 30
-        _OutlineColor ("Outline Color", Color) = (0, 0, 0, 0)
     }
     SubShader
     {
@@ -55,8 +53,6 @@ Shader "Line Art/Lines Post Processing"
 
             sampler2D _MainTex;
             float4 _MainTex_TexelSize;
-            float4 _OutlineColor;
-            float _Scale;
             float _DepthThreshold;
             float _NormalThresholdAngle;
 
@@ -142,7 +138,7 @@ Shader "Line Art/Lines Post Processing"
 
                 float edge = max(depthEdge, normalEdge);
 
-                col = lerp(baseCol, _OutlineColor, edge).rgb;
+                col = edge.rrr;
 
                 // col = VisualizeNormals(planeNormal);
                 // col = SampleSceneDepth(v.uv);
