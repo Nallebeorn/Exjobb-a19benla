@@ -52,7 +52,8 @@ Shader "Line Art/Composite Lines"
             float4 frag(VertexOut v) : SV_Target
             {
                 float3 col;
-                col = lerp(tex2D(_MainTex, v.uv).rgb, _OutlineColor.rgb, tex2D(_LinesTex, v.uv).r);
+                float3 base = tex2D(_MainTex, v.uv).rgb;
+                col = lerp(base, _OutlineColor.rgb, tex2D(_LinesTex, v.uv).r);
                 return float4(col, 1.0);
             }
             ENDHLSL

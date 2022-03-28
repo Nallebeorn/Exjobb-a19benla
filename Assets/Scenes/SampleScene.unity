@@ -454,7 +454,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 76f527003e3dac44c8c84a13867544a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  strokeTexture: {fileID: 2800000, guid: d6bb613ae75c4974ca5acd3377604b97, type: 3}
+  strokeTexture: {fileID: 2800000, guid: 2abbe72a6bf5d8d4d9f196f9ef1eccc9, type: 3}
+  texture: {fileID: 0}
   textureTheseMeshes:
   - {fileID: 1523954654}
 --- !u!1 &315034417
