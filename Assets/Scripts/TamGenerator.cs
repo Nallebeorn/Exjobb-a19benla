@@ -24,7 +24,7 @@ public class TamGenerator : MonoBehaviour
     private void GenerateTextureMap()
     {
         texture = new Texture2D(2048, 2048, TextureFormat.RGBA32, true, true);
-
+        
         Color[] stroke = strokeTexture.GetPixels();
 
         Color[][] tam = new Color[texture.mipmapCount][];
