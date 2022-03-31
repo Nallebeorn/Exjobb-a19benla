@@ -83,5 +83,8 @@ public class TamGenerator : MonoBehaviour
         }
 
         texture.Apply(false);
+
+        texture.filterMode = FilterMode.Trilinear;
+        // texture.anisoLevel = 16;
     }
 }

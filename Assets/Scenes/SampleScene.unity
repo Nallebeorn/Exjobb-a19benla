@@ -175,7 +175,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 8d88a23a72901a645bad6120d96941ae, type: 2}
+  - {fileID: 2100000, guid: d4bfa99c2dc3320418ff2f1c93e45bf8, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -271,7 +271,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 8d88a23a72901a645bad6120d96941ae, type: 2}
+  - {fileID: 2100000, guid: d4bfa99c2dc3320418ff2f1c93e45bf8, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -605,7 +605,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 8d88a23a72901a645bad6120d96941ae, type: 2}
+  - {fileID: 2100000, guid: d4bfa99c2dc3320418ff2f1c93e45bf8, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -888,8 +888,8 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: 0.3
-  far clip plane: 1000
+  near clip plane: 1
+  far clip plane: 400
   field of view: 60
   orthographic: 0
   orthographic size: 5
@@ -1289,7 +1289,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 8d88a23a72901a645bad6120d96941ae, type: 2}
+  - {fileID: 2100000, guid: 2d4c1557e05971848a825550659c0669, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1385,7 +1385,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 8d88a23a72901a645bad6120d96941ae, type: 2}
+  - {fileID: 2100000, guid: d4bfa99c2dc3320418ff2f1c93e45bf8, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

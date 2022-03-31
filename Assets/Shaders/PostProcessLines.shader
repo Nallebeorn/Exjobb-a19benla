@@ -59,6 +59,14 @@ Shader "Line Art/Lines Post Processing"
             float3 SampleWorldSpacePosition(float2 uv)
             {
                 float depth = SampleSceneDepth(uv);
+
+                #if !UNITY_REVERSED_Z
+                    // SampleSceneDepth always returns a value 0..1,
+                    // but ComputeWorldSpacePosition needs its depth in NDC,
+                    // which is -1..1 in OpenGL
+                    depth = depth * 2 - 1;
+                #endif
+
                 return ComputeWorldSpacePosition(uv, depth, UNITY_MATRIX_I_VP);
             }
 
@@ -75,7 +83,7 @@ Shader "Line Art/Lines Post Processing"
             float4 frag(VertexOut v) : SV_Target
             {
                 float4 baseCol = tex2D(_MainTex, v.uv);
-                
+
                 #define FILTER_SIZE 6
 
                 float3 sobelFilterX[FILTER_SIZE] =
@@ -112,7 +120,7 @@ Shader "Line Art/Lines Post Processing"
 
                 float normalEdgeX = 0;
                 float normalEdgeY = 0;
-                
+
                 for (int i = 0; i < FILTER_SIZE; i++)
                 {
                     const float2 coordsX = v.uv + sobelFilterX[i].xy * pixelSize;
