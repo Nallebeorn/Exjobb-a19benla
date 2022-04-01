@@ -44,8 +44,8 @@ Shader "Line Art/Lit Hatching"
 
             #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
             #pragma multi_compile _ _SHADOWS_SOFT
+            
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 
             struct Attributes
@@ -60,9 +60,10 @@ Shader "Line Art/Lit Hatching"
             {
                 float4 pos : SV_POSITION;
                 float2 texcoord : TEXCOORD0;
-                float4 color : TEXCOORD1;
-                float4 shadowCoord : TEXCOORD2;
-                float4 clipPos : TEXCOORD3;
+                float3 normal : TEXCOORD1;
+                float4 color : TEXCOORD2;
+                float4 shadowCoord : TEXCOORD3;
+                float4 clipPos : TEXCOORD4;
             };
 
             sampler2D _BaseMap;
@@ -79,6 +80,7 @@ Shader "Line Art/Lit Hatching"
                 //float4 st = _PaletteTex_ST;
                 //o.texcoord = (v.texcoord + st.zw - 0.5) * st.xy + 0.5;
                 o.texcoord = v.texcoord;
+                o.normal = TransformObjectToWorldNormal(v.normal);
                 o.color = v.color;
                 const VertexPositionInputs positions = GetVertexPositionInputs(v.pos.xyz);
                 o.shadowCoord = TransformWorldToShadowCoord(positions.positionWS);
@@ -89,6 +91,11 @@ Shader "Line Art/Lit Hatching"
 
             float4 frag(Varyings v) : SV_Target
             {
+                Light light = GetMainLight();
+
+                float nDotL = saturate(dot(v.normal.xyz, light.direction));
+                return nDotL;
+                
                 return float4(0.3, 0.7, 0.6, 1.0);
             }
             
@@ -150,6 +157,38 @@ Shader "Line Art/Lit Hatching"
             #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/CommonMaterial.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/SurfaceInput.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/Shaders/DepthOnlyPass.hlsl"
+            ENDHLSL
+        }
+        
+        Pass
+        {
+            Name "DepthNormals"
+            Tags
+            {
+                "LightMode"="DepthNormals"
+            }
+            
+            ZWrite On
+            ZTest LEqual
+            
+            HLSLPROGRAM
+
+            #pragma vertex DepthNormalsVertex
+            #pragma fragment DepthNormalsFragment
+
+            // Material keywords
+            #pragma shader_feature_local _NORMALMAP
+	        #pragma shader_feature_local_fragment _ALPHATEST_ON
+	        #pragma shader_feature_local_fragment _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
+
+            // GPU Instancing
+            #pragma multi_compile_instancing
+            // #pragma multi_compile _ DOTS_INSTANCING_ON
+
+            #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/CommonMaterial.hlsl"
+	        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/SurfaceInput.hlsl"
+	        #include "Packages/com.unity.render-pipelines.universal/Shaders/DepthNormalsPass.hlsl"
+            
             ENDHLSL
         }
     }
