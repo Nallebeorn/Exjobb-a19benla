@@ -17,6 +17,8 @@ public class CameraController : MonoBehaviour
     {
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+        
+        Debug.Log("Tex arrays? " + SystemInfo.supports2DArrayTextures);
     }
 
     // Update is called once per frame

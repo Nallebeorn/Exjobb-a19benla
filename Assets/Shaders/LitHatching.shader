@@ -2,9 +2,7 @@ Shader "Line Art/Lit Hatching"
 {
     Properties
     {
-        _BaseMap ("Texture", 2D) = "white" {}
-        _BaseColor ("Color", Color) = (1, 1, 1, 1)
-        _UVScale ("UV Scale", Float) = 1
+        _TamTexture ("TAM Texture", 2D) = "white"
         _Cutoff ("Alpha Cutoff", Float) = 0.5
         [Enum(UnityEngine.Rendering.CullMode)] _Cull ("Cull Mode", Int) = 2 // Back
     }
@@ -23,8 +21,8 @@ Shader "Line Art/Lit Hatching"
         #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
         CBUFFER_START(UnityPerMaterial)
-        float4 _BaseMap_ST;
         float4 _BaseColor;
+        float4 _BaseMap_ST;
         float _Cutoff;
         CBUFFER_END
 
@@ -66,12 +64,8 @@ Shader "Line Art/Lit Hatching"
                 float4 clipPos : TEXCOORD4;
             };
 
-            sampler2D _BaseMap;
-            sampler2D _MaskTex;
-            TEXTURE2D(_PaletteTex);
-            SAMPLER(sampler_PaletteTex);
-            float4 _ShadowColor;
-
+            sampler2D _TamTexture;
+            
             Varyings vert(Attributes v)
             {
                 Varyings o;
@@ -94,7 +88,10 @@ Shader "Line Art/Lit Hatching"
                 Light light = GetMainLight();
 
                 float nDotL = saturate(dot(v.normal.xyz, light.direction));
-                return nDotL;
+                nDotL = 1.0;
+                float4 col = tex2D(_TamTexture, v.texcoord);
+
+                return nDotL * col;
                 
                 return float4(0.3, 0.7, 0.6, 1.0);
             }
