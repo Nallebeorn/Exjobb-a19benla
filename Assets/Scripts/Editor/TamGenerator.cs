@@ -10,12 +10,13 @@ public class TamGenerator : MonoBehaviour
 {
     private const string strokeTexturePath = "BadStroke";
     private const string outPath = "Assets/Textures/Tam.gen.asset";
-    private const float desiredTone = 0.9f;
+    private const float desiredTone = 0.75f;
 
     public struct TextureColors
     {
         public int width;
         public int height;
+        public Vector2Int size => new Vector2Int(width, height);
         public Color32[] colors;
 
         public TextureColors(Texture2D texture, int mipLevel = 0)
@@ -35,6 +36,14 @@ public class TamGenerator : MonoBehaviour
             return colors[x + y * width];
         }
 
+        public Color32 SampleLinear(float x, float y)
+        {
+            int yPoint = Mathf.RoundToInt(y);
+            Color32 col1 = GetPixel(Mod(Mathf.FloorToInt(x), width), yPoint);
+            Color32 col2 = GetPixel(Mod(Mathf.CeilToInt(x), height), yPoint);
+            return Color32.Lerp(col1, col2, Frac(x));
+        }
+
         public void Fill(Color32 color)
         {
             for (int x = 0; x < width; x++)
@@ -51,7 +60,7 @@ public class TamGenerator : MonoBehaviour
             texture.SetPixels32(colors, mipLevel);
         }
     }
-    
+
     [MenuItem("Line Art/Generate TAM texture %#t")]
     private static void GenerateTextureMap()
     {
@@ -65,6 +74,7 @@ public class TamGenerator : MonoBehaviour
         float[] averageTonesBefore = new float[texture.mipmapCount];
         float[] averageTonesAfter = new float[texture.mipmapCount];
 
+
         for (int m = 0; m < texture.mipmapCount; m++)
         {
             mips[m] = new TextureColors(texture, m);
@@ -74,20 +84,43 @@ public class TamGenerator : MonoBehaviour
 
         for (int m = texture.mipmapCount - 1; m >= 0; m--)
         {
-            for (int failsafe = 0; failsafe < 4096; failsafe++)
+            // int pixelWidth = Mathf.FloorToInt(0.5f * mips[m].width);
+            // BlitWrapped(new Vector2(0.5f, 0.5f), new Vector2Int(pixelWidth, stroke.height), mips[m], stroke);
+
+            for (int failsafe = 0; failsafe < 256; failsafe++)
             {
-                if (CalculateTone(mips[m]) <= desiredTone)
+                float s = Random.value;
+                float t = Random.value;
+                float length = Random.Range(0.3f, 1.0f);
+
+                TextureColors tmp = new TextureColors(texture, m);
+                Array.Copy(mips[m].colors, tmp.colors, Mathf.Min(tmp.colors.Length, mips[m].colors.Length));
+                int pixelWidth = Mathf.RoundToInt(length * tmp.width);
+                if (pixelWidth == 0)
+                {
+                    if (desiredTone >= 0.5f)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        pixelWidth = 1;
+                    }
+                }
+                BlitWrapped(new Vector2(s, t), new Vector2Int(pixelWidth, stroke.height), tmp, stroke);
+
+                float newTone = CalculateTone(tmp);
+                
+                if (newTone < desiredTone)
                 {
                     Debug.Log("Reached tone for " + m);
                     break;
                 }
 
-                float s = Random.value;
-                float t = Random.value;
-
                 for (int mm = m; mm >= 0; mm--)
                 {
-                    BlitWrapped(new Vector2(s, t), mips[mm], stroke);
+                    pixelWidth = Mathf.Max(1, Mathf.RoundToInt(length * mips[mm].width));
+                    BlitWrapped(new Vector2(s, t), new Vector2Int(pixelWidth, stroke.height), mips[mm], stroke);
                 }
 
                 //
@@ -108,31 +141,39 @@ public class TamGenerator : MonoBehaviour
 
         texture.filterMode = FilterMode.Trilinear;
         texture.anisoLevel = 16;
+        texture.mipMapBias = -0.5f;
 
         CreateOrReplaceAsset(texture, outPath);
-        
+
         double timeSpent = Time.realtimeSinceStartupAsDouble - t0;
         Debug.Log($"Generated texture {outPath} in {timeSpent:F3}s");
     }
 
-    static void BlitWrapped(Vector2 uv, TextureColors target, TextureColors image)
+    static void BlitWrapped(Vector2 uv, Vector2Int size, TextureColors target, TextureColors image)
     {
         Vector2Int pixelCoords = new Vector2Int(Mathf.RoundToInt(uv.x * target.width), Mathf.RoundToInt(uv.y * target.height));
-        int offsetX = pixelCoords.x - image.width / 2;
-        int offsetY = pixelCoords.y - image.height / 2;
+        int offsetX = pixelCoords.x - size.x / 2;
+        int offsetY = pixelCoords.y - size.y / 2;
 
-        for (int imgx = 0; imgx < image.width; imgx++)
+        for (int imgx = 0; imgx < size.x; imgx++)
         {
-            for (int imgy = 0; imgy < image.height; imgy++)
+            for (int imgy = 0; imgy < size.y; imgy++)
             {
                 int targetX = Mod(offsetX + imgx, target.width);
                 int targetY = Mod(offsetY + imgy, target.height);
-                Color32 srcPixel = image.GetPixel(imgx, imgy);
+                float sourceX = ((float)imgx / size.x) * image.width;
+                float sourceY = ((float)imgy / size.y) * image.height;
+                Color32 srcPixel = image.SampleLinear(sourceX, sourceY);
                 Color32 dstPixel = target.GetPixel(targetX, targetY);
                 Color32 newColor = Color32.Lerp(dstPixel, srcPixel, srcPixel.a / 255.0f);
                 target.SetPixel(targetX, targetY, newColor);
             }
         }
+    }
+
+    static float Frac(float x)
+    {
+        return Mathf.Repeat(x, 1.0f);
     }
 
     static float CalculateTone(TextureColors tex)
