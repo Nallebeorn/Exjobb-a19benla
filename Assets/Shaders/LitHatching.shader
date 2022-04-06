@@ -35,14 +35,14 @@ Shader "Line Art/Lit Hatching"
         Pass
         {
             Name "Color"
-            
+
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
 
             #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
             #pragma multi_compile _ _SHADOWS_SOFT
-            
+
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 
@@ -65,7 +65,7 @@ Shader "Line Art/Lit Hatching"
             };
 
             sampler2D _TamTexture;
-            
+
             Varyings vert(Attributes v)
             {
                 Varyings o;
@@ -88,14 +88,19 @@ Shader "Line Art/Lit Hatching"
                 Light light = GetMainLight();
 
                 float nDotL = saturate(dot(v.normal.xyz, light.direction));
-                nDotL = 1.0;
                 float4 col = tex2D(_TamTexture, v.texcoord);
-
-                return nDotL * col;
                 
+                if (nDotL < col.r)
+                {
+                    return float4(0, 0, 0, 1);
+                }
+                else
+                {
+                    return float4(1, 1, 1, 0);
+                }
+
                 return float4(0.3, 0.7, 0.6, 1.0);
             }
-            
             ENDHLSL
         }
 
@@ -156,7 +161,7 @@ Shader "Line Art/Lit Hatching"
             #include "Packages/com.unity.render-pipelines.universal/Shaders/DepthOnlyPass.hlsl"
             ENDHLSL
         }
-        
+
         Pass
         {
             Name "DepthNormals"
@@ -164,28 +169,26 @@ Shader "Line Art/Lit Hatching"
             {
                 "LightMode"="DepthNormals"
             }
-            
+
             ZWrite On
             ZTest LEqual
-            
-            HLSLPROGRAM
 
+            HLSLPROGRAM
             #pragma vertex DepthNormalsVertex
             #pragma fragment DepthNormalsFragment
 
             // Material keywords
             #pragma shader_feature_local _NORMALMAP
-	        #pragma shader_feature_local_fragment _ALPHATEST_ON
-	        #pragma shader_feature_local_fragment _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
+            #pragma shader_feature_local_fragment _ALPHATEST_ON
+            #pragma shader_feature_local_fragment _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
 
             // GPU Instancing
             #pragma multi_compile_instancing
             // #pragma multi_compile _ DOTS_INSTANCING_ON
 
             #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/CommonMaterial.hlsl"
-	        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/SurfaceInput.hlsl"
-	        #include "Packages/com.unity.render-pipelines.universal/Shaders/DepthNormalsPass.hlsl"
-            
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/SurfaceInput.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/Shaders/DepthNormalsPass.hlsl"
             ENDHLSL
         }
     }
