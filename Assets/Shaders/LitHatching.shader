@@ -89,6 +89,8 @@ Shader "Line Art/Lit Hatching"
 
                 float nDotL = saturate(dot(v.normal.xyz, light.direction));
                 float4 col = tex2D(_TamTexture, v.texcoord);
+
+                return col;
                 
                 if (nDotL < col.r)
                 {
