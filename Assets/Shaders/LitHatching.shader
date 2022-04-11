@@ -2,7 +2,8 @@ Shader "Line Art/Lit Hatching"
 {
     Properties
     {
-        _TamTexture ("TAM Texture", 2D) = "white"
+        _TamTexture ("TAM Texture", 2D) = "white" {}
+        _Tone ("Tone", Range(0, 1)) = 0.0
         _Cutoff ("Alpha Cutoff", Float) = 0.5
         [Enum(UnityEngine.Rendering.CullMode)] _Cull ("Cull Mode", Int) = 2 // Back
     }
@@ -24,6 +25,7 @@ Shader "Line Art/Lit Hatching"
         float4 _BaseColor;
         float4 _BaseMap_ST;
         float _Cutoff;
+        float _Tone;
         CBUFFER_END
 
         float rand(float2 seed)
@@ -65,6 +67,7 @@ Shader "Line Art/Lit Hatching"
             };
 
             sampler2D _TamTexture;
+            float4 _TamTexture_ST;
 
             Varyings vert(Attributes v)
             {
@@ -73,7 +76,7 @@ Shader "Line Art/Lit Hatching"
                 o.pos = TransformObjectToHClip(v.pos.xyz);
                 //float4 st = _PaletteTex_ST;
                 //o.texcoord = (v.texcoord + st.zw - 0.5) * st.xy + 0.5;
-                o.texcoord = v.texcoord;
+                o.texcoord = TRANSFORM_TEX(v.texcoord, _TamTexture);
                 o.normal = TransformObjectToWorldNormal(v.normal);
                 o.color = v.color;
                 const VertexPositionInputs positions = GetVertexPositionInputs(v.pos.xyz);
@@ -88,20 +91,18 @@ Shader "Line Art/Lit Hatching"
                 Light light = GetMainLight();
 
                 float nDotL = saturate(dot(v.normal.xyz, light.direction));
+
+                nDotL = _Tone;
+                
                 float4 col = tex2D(_TamTexture, v.texcoord);
 
-                return col;
-                
-                if (nDotL < col.r)
-                {
-                    return float4(0, 0, 0, 1);
-                }
-                else
-                {
-                    return float4(1, 1, 1, 0);
-                }
+                float t = 1.0 - step(col.r, 1.0 - nDotL);
 
-                return float4(0.3, 0.7, 0.6, 1.0);
+                return col;
+
+                return t;
+                
+                return t;
             }
             ENDHLSL
         }
