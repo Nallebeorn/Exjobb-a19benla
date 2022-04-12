@@ -2,7 +2,7 @@ Shader "Line Art/Lit Hatching"
 {
     Properties
     {
-        _TamTexture ("TAM Texture", 2D) = "white" {}
+        _TamTexture ("TAM Texture", 2DArray) = "white" {}
         _Tone ("Tone", Range(0, 1)) = 0.0
         _Cutoff ("Alpha Cutoff", Float) = 0.5
         [Enum(UnityEngine.Rendering.CullMode)] _Cull ("Cull Mode", Int) = 2 // Back
@@ -65,8 +65,9 @@ Shader "Line Art/Lit Hatching"
                 float4 shadowCoord : TEXCOORD3;
                 float4 clipPos : TEXCOORD4;
             };
-
-            sampler2D _TamTexture;
+            
+            TEXTURE2D_ARRAY(_TamTexture);
+            SAMPLER(sampler_TamTexture);
             float4 _TamTexture_ST;
 
             Varyings vert(Attributes v)
@@ -92,17 +93,15 @@ Shader "Line Art/Lit Hatching"
 
                 float nDotL = saturate(dot(v.normal.xyz, light.direction));
 
-                nDotL = _Tone;
+                float t = 1.0 - nDotL;
+
+                t = _Tone;
+
+                float4 col = SAMPLE_TEXTURE2D_ARRAY(_TamTexture, sampler_TamTexture, v.texcoord, t * 9);
+
+                // return t;
                 
-                float4 col = tex2D(_TamTexture, v.texcoord);
-
-                float t = 1.0 - step(col.r, 1.0 - nDotL);
-
                 return col;
-
-                return t;
-                
-                return t;
             }
             ENDHLSL
         }

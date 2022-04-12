@@ -31,6 +31,10 @@ public class CameraController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             pressedEscape = true;
+            if (!Application.isEditor)
+            {
+                Application.Quit();
+            }
         }
 
         if (Input.GetMouseButtonDown(0))

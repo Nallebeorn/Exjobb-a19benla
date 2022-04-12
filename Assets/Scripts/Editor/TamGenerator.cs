@@ -86,66 +86,65 @@ public class TamGenerator : MonoBehaviour
 
         int strokesDrawn = 0;
 
-        int[] levels = new int[settings.numSnapshots + 1];
+        int[] toneLevels = new int[settings.numSnapshots + 1];
 
-        for (int i = 0; i < levels.Length; i++)
+        for (int i = 0; i < toneLevels.Length; i++)
         {
-            levels[i] = (int)(((float)i / levels.Length) * settings.maximumStrokes);
+            toneLevels[i] = (int)(((float)i / toneLevels.Length) * settings.maximumStrokes);
         }
 
-        for (int m = texture.mipmapCount - 1; m >= 0; m--)
+        for (int level = 0; level < toneLevels.Length; level++)
         {
-            // int pixelWidth = Mathf.FloorToInt(0.5f * mips[m].width);
-            // BlitWrapped(new Vector2(0.5f, 0.5f), new Vector2Int(pixelWidth, stroke.height), mips[m], stroke);
-
-            int maxStrokesForThisMip = (settings.maximumStrokes >> m);
-
-            Debug.Log("max: " + maxStrokesForThisMip);
-
-            while (strokesDrawn <= maxStrokesForThisMip)
+            int targetStrokes = toneLevels[level];
+            
+            for (int m = texture.mipmapCount - 1; m >= 0; m--)
             {
-                float tone = 1;
+                // int pixelWidth = Mathf.FloorToInt(0.5f * mips[m].width);
+                // BlitWrapped(new Vector2(0.5f, 0.5f), new Vector2Int(pixelWidth, stroke.height), mips[m], stroke);
 
-                if (strokesDrawn < settings.startCrossHatching * maxStrokesForThisMip || strokesDrawn >= settings.startDoubleHatching * maxStrokesForThisMip)
+                int maxStrokesForThisMip = (targetStrokes >> m);
+
+                Debug.Log("max: " + maxStrokesForThisMip);
+
+                while (strokesDrawn <= maxStrokesForThisMip)
                 {
-                    float s = Random.value;
-                    float t = Random.value;
-                    float length = Random.Range(settings.strokeMinLength, settings.strokeMaxLength);
+                    float tone = 1;
 
-                    for (int mm = m; mm >= 0; mm--)
+                    // if (strokesDrawn < settings.startCrossHatching * maxStrokesForThisMip || strokesDrawn >= settings.startDoubleHatching * maxStrokesForThisMip)
                     {
-                        int pixelWidth = Mathf.Max(1, Mathf.RoundToInt(length * mips[mm].width));
-                        BlitWrapped(new Vector2(s, t), new Vector2Int(pixelWidth, stroke.height), mips[mm], stroke, tone);
-                    }
-                }
+                        float s = Random.value;
+                        float t = Random.value;
+                        float length = Random.Range(settings.strokeMinLength, settings.strokeMaxLength);
 
-                if (strokesDrawn >= settings.startCrossHatching * maxStrokesForThisMip)
-                {
-                    float s = Random.value;
-                    float t = Random.value;
-                    float length = Random.Range(settings.strokeMinLength, settings.strokeMaxLength);
-
-                    for (int mm = m; mm >= 0; mm--)
-                    {
-                        int pixelWidth = Mathf.Max(1, Mathf.RoundToInt(length * mips[mm].width));
-                        BlitWrapped(new Vector2(s, t), new Vector2Int(pixelWidth, stroke.height), mips[mm], stroke, tone, true);
-                    }
-                }
-
-                for (int i = 0; i < levels.Length; i++)
-                {
-                    if (levels[i] == strokesDrawn)
-                    {
-                        for (int mm = 0; mm < texture.mipmapCount; mm++)
+                        for (int mm = m; mm >= 0; mm--)
                         {
-                            Debug.Log($"Lvl {i}: Resulting tone of mip {m}: {CalculateTone(mips[mm])}");
-                            mips[mm].WriteToTextureArray(textureArray, i, mm);
+                            int pixelWidth = Mathf.Max(1, Mathf.RoundToInt(length * mips[mm].width));
+                            BlitWrapped(new Vector2(s, t), new Vector2Int(pixelWidth, stroke.height), mips[mm], stroke, tone);
                         }
                     }
+
+                    // if (strokesDrawn >= settings.startCrossHatching * maxStrokesForThisMip)
+                    // {
+                    //     float s = Random.value;
+                    //     float t = Random.value;
+                    //     float length = Random.Range(settings.strokeMinLength, settings.strokeMaxLength);
+                    //
+                    //     for (int mm = m; mm >= 0; mm--)
+                    //     {
+                    //         int pixelWidth = Mathf.Max(1, Mathf.RoundToInt(length * mips[mm].width));
+                    //         BlitWrapped(new Vector2(s, t), new Vector2Int(pixelWidth, stroke.height), mips[mm], stroke, tone, true);
+                    //     }
+                    // }
+
+
+                    strokesDrawn++;
+                    
                 }
 
-                strokesDrawn++;
+                Debug.Log($"Lvl {level}: Resulting tone of mip {m}: {CalculateTone(mips[m])}");
+                mips[m].WriteToTextureArray(textureArray, level, m);
             }
+            
         }
 
         double timeSpent = Time.realtimeSinceStartupAsDouble - t0;
