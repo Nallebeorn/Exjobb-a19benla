@@ -8,11 +8,6 @@ using Random = UnityEngine.Random;
 
 public class TamGenerator : MonoBehaviour
 {
-    private const string strokeTexturePath = "BadStroke";
-    private const string outPath = "Assets/Textures/Tam.gen.asset";
-    private const float desiredTone = 0.0f;
-    private const int maximumStrokes = 128;
-
     public struct TextureColors
     {
         public int width;
@@ -60,19 +55,26 @@ public class TamGenerator : MonoBehaviour
         {
             texture.SetPixels32(colors, mipLevel);
         }
+
+        public void WriteToTextureArray(Texture2DArray texture, int depth, int mipLevel)
+        {
+            texture.SetPixels32(colors, depth, mipLevel);
+        }
     }
 
     [MenuItem("Line Art/Generate TAM texture %#t")]
-    private static void GenerateTextureMap()
+    public static void GenerateTextureMap()
     {
+        TamSettings settings = AssetDatabase.LoadAssetAtPath<TamSettings>("Assets/Settings/TAM Settings.asset");
+
         double t0 = Time.realtimeSinceStartupAsDouble;
 
-        Texture2D texture = new Texture2D(512, 512, TextureFormat.RGBA32, true, true);
-        Texture2D strokeTexture = Resources.Load<Texture2D>(strokeTexturePath);
+        Texture2D texture = new Texture2D(settings.size.x, settings.size.y, TextureFormat.RGBA32, true, true);
+        Texture2D strokeTexture = Resources.Load<Texture2D>(settings.strokeTexturePath);
+        Texture2DArray textureArray = new Texture2DArray(settings.size.x, settings.size.y, settings.numSnapshots + 1, TextureFormat.RGBA32, true, true);
 
         TextureColors stroke = new TextureColors(strokeTexture);
         TextureColors[] mips = new TextureColors[texture.mipmapCount];
-        float[] averageTonesBefore = new float[texture.mipmapCount];
 
         float currentTone = 1.0f;
 
@@ -84,60 +86,76 @@ public class TamGenerator : MonoBehaviour
 
         int strokesDrawn = 0;
 
+        int[] levels = new int[settings.numSnapshots + 1];
+
+        for (int i = 0; i < levels.Length; i++)
+        {
+            levels[i] = (int)(((float)i / levels.Length) * settings.maximumStrokes);
+        }
+
         for (int m = texture.mipmapCount - 1; m >= 0; m--)
         {
             // int pixelWidth = Mathf.FloorToInt(0.5f * mips[m].width);
             // BlitWrapped(new Vector2(0.5f, 0.5f), new Vector2Int(pixelWidth, stroke.height), mips[m], stroke);
 
-            int maxStrokesForThisMip = (maximumStrokes >> m) >> m;
-            
-            while (strokesDrawn < maxStrokesForThisMip)
+            int maxStrokesForThisMip = (settings.maximumStrokes >> m);
+
+            Debug.Log("max: " + maxStrokesForThisMip);
+
+            while (strokesDrawn <= maxStrokesForThisMip)
             {
-                strokesDrawn++;
-                
-                float s = Random.value;
-                float t = Random.value;
-                float length = Random.Range(0.1f, 0.6f);
+                float tone = 1;
 
-                float tone = (float)strokesDrawn / maximumStrokes;
-
-                for (int mm = m; mm >= 0; mm--)
+                if (strokesDrawn < settings.startCrossHatching * maxStrokesForThisMip || strokesDrawn >= settings.startDoubleHatching * maxStrokesForThisMip)
                 {
-                    int pixelWidth = Mathf.Max(1, Mathf.RoundToInt(length * mips[mm].width));
-                    BlitWrapped(new Vector2(s, t), new Vector2Int(pixelWidth, stroke.height), mips[mm], stroke, tone);
-                }
-
-                if (strokesDrawn > maxStrokesForThisMip / 2)
-                {
-                    float s2 = Random.value;
-                    float t2 = Random.value;
-                    float length2 = Random.Range(0.1f, 0.6f);
+                    float s = Random.value;
+                    float t = Random.value;
+                    float length = Random.Range(settings.strokeMinLength, settings.strokeMaxLength);
 
                     for (int mm = m; mm >= 0; mm--)
                     {
-                        int pixelWidth = Mathf.Max(1, Mathf.RoundToInt(length2 * mips[mm].width));
-                        BlitWrapped(new Vector2(s2, t2), new Vector2Int(pixelWidth, stroke.height), mips[mm], stroke, tone, true);
+                        int pixelWidth = Mathf.Max(1, Mathf.RoundToInt(length * mips[mm].width));
+                        BlitWrapped(new Vector2(s, t), new Vector2Int(pixelWidth, stroke.height), mips[mm], stroke, tone);
                     }
                 }
+
+                if (strokesDrawn >= settings.startCrossHatching * maxStrokesForThisMip)
+                {
+                    float s = Random.value;
+                    float t = Random.value;
+                    float length = Random.Range(settings.strokeMinLength, settings.strokeMaxLength);
+
+                    for (int mm = m; mm >= 0; mm--)
+                    {
+                        int pixelWidth = Mathf.Max(1, Mathf.RoundToInt(length * mips[mm].width));
+                        BlitWrapped(new Vector2(s, t), new Vector2Int(pixelWidth, stroke.height), mips[mm], stroke, tone, true);
+                    }
+                }
+
+                for (int i = 0; i < levels.Length; i++)
+                {
+                    if (levels[i] == strokesDrawn)
+                    {
+                        for (int mm = 0; mm < texture.mipmapCount; mm++)
+                        {
+                            Debug.Log($"Lvl {i}: Resulting tone of mip {m}: {CalculateTone(mips[mm])}");
+                            mips[mm].WriteToTextureArray(textureArray, i, mm);
+                        }
+                    }
+                }
+
+                strokesDrawn++;
             }
         }
 
-        for (int m = 0; m < texture.mipmapCount; m++)
-        {
-            mips[m].WriteToTexture(texture, m);
-            Debug.Log($"Resulting tone of mip {m}: {CalculateTone(mips[m])}");
-        }
-
-        texture.Apply(false);
-
-        texture.filterMode = FilterMode.Trilinear;
-        texture.anisoLevel = 16;
-        texture.mipMapBias = -0.5f;
-
-        CreateOrReplaceAsset(texture, outPath);
-
         double timeSpent = Time.realtimeSinceStartupAsDouble - t0;
-        Debug.Log($"Generated texture {outPath} in {timeSpent:F3}s");
+        Debug.Log($"Generated texture {settings.outPath} in {timeSpent:F3}s");
+
+        textureArray.filterMode = FilterMode.Trilinear;
+        textureArray.anisoLevel = 16;
+        textureArray.mipMapBias = -0.5f;
+
+        CreateOrReplaceAsset(textureArray, $"{settings.outPath}/Tam.gen.asset");
     }
 
     static void BlitWrapped(Vector2 uv, Vector2Int size, TextureColors target, TextureColors image, float tone = 1, bool vertical = false)
@@ -156,6 +174,7 @@ public class TamGenerator : MonoBehaviour
                 {
                     (targetX, targetY) = (targetY, targetX);
                 }
+
                 float sourceX = ((float)imgx / size.x) * image.width;
                 float sourceY = ((float)imgy / size.y) * image.height;
                 Color32 srcPixel = image.SampleLinear(sourceX, sourceY);
@@ -190,15 +209,22 @@ public class TamGenerator : MonoBehaviour
 
     static T CreateOrReplaceAsset<T>(T asset, string path) where T : UnityEngine.Object
     {
+        Debug.Log($"Creating or replacing asset at {path}");
+        
+        AssetDatabase.Refresh();
+
         T existingAsset = AssetDatabase.LoadAssetAtPath<T>(path);
 
         if (existingAsset == null)
         {
+            Debug.Log("(create)");
             AssetDatabase.CreateAsset(asset, path);
+            AssetDatabase.SaveAssets();
             existingAsset = asset;
         }
         else
         {
+            Debug.Log("(replace)");
             EditorUtility.CopySerialized(asset, existingAsset);
             AssetDatabase.SaveAssets();
         }

@@ -12,6 +12,8 @@ public class CameraController : MonoBehaviour
 
     private bool pressedEscape = false;
 
+    private Rigidbody rbody;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -19,10 +21,12 @@ public class CameraController : MonoBehaviour
         Cursor.visible = false;
         
         Debug.Log("Tex arrays? " + SystemInfo.supports2DArrayTextures);
+
+        rbody = GetComponent<Rigidbody>();
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
@@ -43,12 +47,16 @@ public class CameraController : MonoBehaviour
         float pitch = Input.GetAxis("Mouse Y");
         bool fast = Input.GetButton("Fire3");
 
-        float delta = Time.deltaTime * (fast ? fastSpeed : speed);
+        float effectiveSpeed = fast ? fastSpeed : speed;
+        float delta = Time.deltaTime * effectiveSpeed;
+        
+        Vector3 velocity = Vector3.zero;
+        velocity += transform.forward * forward * effectiveSpeed;
+        velocity += transform.right * strafe * effectiveSpeed;
+        velocity += transform.up * elevate * effectiveSpeed;
 
-        transform.position += transform.forward * forward * delta;
-        transform.position += transform.right * strafe * delta;
-        transform.position += transform.up * elevate * delta;
-
+        rbody.velocity = velocity;
+        
         transform.Rotate(Vector3.up, rotateSpeed * yaw, Space.World);
         transform.Rotate(Vector3.right, -rotateSpeed * pitch, Space.Self);
         

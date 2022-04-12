@@ -93,3 +93,6 @@ fmod_editor.log
 /Fmod/BTS_Fmod/.cache/
 /Fmod/BTS_Fmod/.user/
 /Fmod/BTS_Fmod/.unsaved/
+
+# Line Art generated files
+/Assets/Textures/Tam.gen.asset

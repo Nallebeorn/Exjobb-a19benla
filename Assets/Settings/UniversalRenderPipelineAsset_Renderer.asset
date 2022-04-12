@@ -58,7 +58,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Active: 1
   settings:
-    renderPassEvent: 500
+    renderPassEvent: 450
     blitMaterial: {fileID: 2100000, guid: 1c8b2165b681e2a43a554b4323d82166, type: 2}
     blitMaterialPassIndex: 0
     sourceType: 0
@@ -79,7 +79,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Active: 1
   settings:
-    renderPassEvent: 500
+    renderPassEvent: 450
     blitMaterial: {fileID: 2100000, guid: 166c0e8e3ba08ac4f9fc44c81e1a380f, type: 2}
     blitMaterialPassIndex: 0
     sourceType: 0
