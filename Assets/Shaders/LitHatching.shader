@@ -87,20 +87,30 @@ Shader "Line Art/Lit Hatching"
                 return o;
             }
 
+            float4 SampleInterpolatedArray(Texture2DArray textureArray, SamplerState textureSampler, float2 uv, float index)
+            {
+                float4 col1 = SAMPLE_TEXTURE2D_ARRAY(textureArray, textureSampler, uv, floor(index));
+                float4 col2 = SAMPLE_TEXTURE2D_ARRAY(textureArray, textureSampler, uv, ceil(index));
+                return lerp(col1, col2, frac(index));
+            }
+
             float4 frag(Varyings v) : SV_Target
             {
                 Light light = GetMainLight();
 
                 float nDotL = saturate(dot(v.normal.xyz, light.direction));
 
-                float t = 1.0 - nDotL;
-
-                t = _Tone;
-
-                float4 col = SAMPLE_TEXTURE2D_ARRAY(_TamTexture, sampler_TamTexture, v.texcoord, t * 9);
-
-                // return t;
                 
+                float tone = smoothstep(0, 0.5, nDotL);
+                float index = 1.0 - nDotL;
+
+                // t = _Tone;
+
+
+                // return tone;
+
+                float4 col = SampleInterpolatedArray(_TamTexture, sampler_TamTexture, v.texcoord, index * 9);
+
                 return col;
             }
             ENDHLSL

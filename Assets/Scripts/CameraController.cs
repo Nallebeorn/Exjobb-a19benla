@@ -10,6 +10,8 @@ public class CameraController : MonoBehaviour
     public float fastSpeed = 30.0f;
     public float rotateSpeed = 1.0f;
 
+    public Transform light;
+
     private bool pressedEscape = false;
 
     private Rigidbody rbody;
@@ -49,6 +51,8 @@ public class CameraController : MonoBehaviour
         float elevate = Input.GetAxis("Elevate");
         float yaw = Input.GetAxis("Mouse X");
         float pitch = Input.GetAxis("Mouse Y");
+        float lightx = Input.GetAxis("Light X");
+        float lighty = Input.GetAxis("Light Y");
         bool fast = Input.GetButton("Fire3");
 
         float effectiveSpeed = fast ? fastSpeed : speed;
@@ -63,6 +67,12 @@ public class CameraController : MonoBehaviour
         
         transform.Rotate(Vector3.up, rotateSpeed * yaw, Space.World);
         transform.Rotate(Vector3.right, -rotateSpeed * pitch, Space.Self);
+
+        if (light)
+        {
+            light.Rotate(Vector3.up, rotateSpeed * lightx, Space.World);
+            light.Rotate(Vector3.right, -rotateSpeed * lighty, Space.Self);
+        }
         
         ScreenshotSaving();
     }

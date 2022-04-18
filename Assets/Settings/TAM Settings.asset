@@ -20,5 +20,5 @@ MonoBehaviour:
   strokeMinLength: 0.1
   strokeMaxLength: 0.6
   numSnapshots: 8
-  startCrossHatching: 0.5
-  startDoubleHatching: 0.75
+  startCrossHatching: 0.25
+  startDoubleHatching: 0.25
