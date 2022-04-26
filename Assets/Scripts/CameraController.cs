@@ -58,12 +58,12 @@ public class CameraController : MonoBehaviour
         float effectiveSpeed = fast ? fastSpeed : speed;
         float delta = Time.deltaTime * effectiveSpeed;
         
-        Vector3 velocity = Vector3.zero;
-        velocity += transform.forward * forward * effectiveSpeed;
-        velocity += transform.right * strafe * effectiveSpeed;
-        velocity += transform.up * elevate * effectiveSpeed;
+        Vector3 move = Vector3.zero;
+        move += transform.forward * forward;
+        move += transform.right * strafe;
+        move += Vector3.up * elevate;
 
-        rbody.velocity = velocity;
+        rbody.velocity = move.normalized * effectiveSpeed;
         
         transform.Rotate(Vector3.up, rotateSpeed * yaw, Space.World);
         transform.Rotate(Vector3.right, -rotateSpeed * pitch, Space.Self);
