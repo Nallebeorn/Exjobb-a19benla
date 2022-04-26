@@ -1129,7 +1129,7 @@ GameObject:
   - component: {fileID: 1034118193}
   - component: {fileID: 1034118192}
   m_Layer: 5
-  m_Name: Image (1)
+  m_Name: Controls
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1148,12 +1148,12 @@ RectTransform:
   m_Children:
   - {fileID: 1382895214}
   m_Father: {fileID: 1897195164}
-  m_RootOrder: 1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 457.5912, y: 85.4396}
+  m_SizeDelta: {x: 572.0684, y: 114.6678}
   m_Pivot: {x: 0, y: 0}
 --- !u!114 &1034118192
 MonoBehaviour:
@@ -1321,9 +1321,8 @@ GameObject:
   - component: {fileID: 1382895214}
   - component: {fileID: 1382895217}
   - component: {fileID: 1382895216}
-  - component: {fileID: 1382895215}
   m_Layer: 5
-  m_Name: Text
+  m_Name: ControlsText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1348,21 +1347,6 @@ RectTransform:
   m_AnchoredPosition: {x: 44.1604, y: 23.6998}
   m_SizeDelta: {x: 53.7208, y: 25.3997}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1382895215
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1382895213}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_EffectColor: {r: 0, g: 0, b: 0, a: 0.5}
-  m_EffectDistance: {x: 3, y: -3}
-  m_UseGraphicAlpha: 1
 --- !u!114 &1382895216
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1385,7 +1369,7 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 20
+    m_FontSize: 25
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 0
@@ -1422,7 +1406,7 @@ GameObject:
   - component: {fileID: 1559764884}
   - component: {fileID: 1559764883}
   m_Layer: 5
-  m_Name: Image
+  m_Name: Thesis
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1441,7 +1425,7 @@ RectTransform:
   m_Children:
   - {fileID: 1904526964}
   m_Father: {fileID: 1897195164}
-  m_RootOrder: 0
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
@@ -1596,8 +1580,8 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_Children:
-  - {fileID: 1559764882}
   - {fileID: 1034118191}
+  - {fileID: 1559764882}
   m_Father: {fileID: 0}
   m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1617,9 +1601,8 @@ GameObject:
   - component: {fileID: 1904526964}
   - component: {fileID: 1904526966}
   - component: {fileID: 1904526965}
-  - component: {fileID: 1904526967}
   m_Layer: 5
-  m_Name: Text
+  m_Name: ThesisText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1677,8 +1660,8 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "Examensarbete inom huvudomr\xE5det informationsteknologi\nDataspelsutveckling
-    - Programmering vid H\xF6gskolan i Sk\xF6vde"
+  m_Text: "Bachelor's thesis project\nGame Development - Programming at University
+    of Sk\xF6vde\nBenjamin Larsson"
 --- !u!222 &1904526966
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1687,21 +1670,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1904526963}
   m_CullTransparentMesh: 1
---- !u!114 &1904526967
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1904526963}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_EffectColor: {r: 0, g: 0, b: 0, a: 0.5}
-  m_EffectDistance: {x: 3, y: -3}
-  m_UseGraphicAlpha: 1
 --- !u!1 &1907550090
 GameObject:
   m_ObjectHideFlags: 0

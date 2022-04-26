@@ -16,6 +16,11 @@ public class CameraController : MonoBehaviour
 
     private Rigidbody rbody;
 
+    private void Awake()
+    {
+        Screen.SetResolution(1920, 1080, FullScreenMode.ExclusiveFullScreen);
+    }
+
     // Start is called before the first frame update
     void Start()
     {
