@@ -99,13 +99,11 @@ Shader "Line Art/Lit Hatching"
                 Light light = GetMainLight();
 
                 float nDotL = saturate(dot(v.normal.xyz, light.direction));
-
                 
                 float tone = smoothstep(0, 0.5, nDotL);
                 float index = 1.0 - nDotL;
 
                 // t = _Tone;
-
 
                 // return tone;
 
